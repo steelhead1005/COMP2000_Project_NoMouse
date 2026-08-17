@@ -15,3 +15,6 @@ class Obstacle {
 
 interface Avoidable {
 }
+
+class Pillar extends Obstacle implements Avoidable {
+}
