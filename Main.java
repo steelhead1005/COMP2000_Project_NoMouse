@@ -6,3 +6,6 @@ class Flock {
 
 class Obstacle {
 }
+
+interface Avoidable {
+}
