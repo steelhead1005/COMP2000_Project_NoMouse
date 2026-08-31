@@ -81,4 +81,111 @@ class Obstacle {
         }
         return false;
     }
+
+// ---------------------------------------------------------------
+    // Boid avoidance
+    // ---------------------------------------------------------------
+ 
+    /**
+     * Simple radial repulsion steering force. Call this once per boid per
+     * frame and add the result to the boid's acceleration/velocity.
+     *
+     * @param boidX      boid's current x position
+     * @param boidY      boid's current y position
+     * @param avoidMargin buffer distance (beyond the radius) at which
+     *                    the boid starts reacting
+     * @param maxForce    strength of the push when the boid is right at the
+     *                    pillar's edge
+     * @return a {dx, dy} force vector; {0, 0} if the boid is outside the
+     *         avoidance zone
+     */
+
+    public double[] computeAvoidanceForce(double boidX, double boidY,
+                                           double avoidMargin, double maxForce) {
+        double dx = boidX - x;
+        double dy = boidY - y;
+        double dist = Math.sqrt(dx * dx + dy * dy);
+        double safeDist = radius + avoidMargin;
+
+        if (dist >= safeDist) {
+            return new double[]{0, 0};
+        }
+        if (dist == 0) {
+            // Boid is exactly on the center; push it in an arbitrary direction.
+            return new double[]{maxForce, 0};
+        }
+
+        double overlap = safeDist - dist;          
+        double strength = (overlap / safeDist) * maxForce; 
+
+        double nx = dx / dist;
+        double ny = dy / dist;
+
+        return new double[]{nx * strength, ny * strength};
+    }
+
+// might need to remove this render method if it causes issues with the graphics context
+    public void render(Graphics2D g2d) {
+        int drawX = (int) (x - radius);
+        int drawY = (int) (y - radius);
+        int diameter = (int) (radius * 2);
+
+        g2d.setColor(new Color(120, 70, 30));
+        g2d.fillOval(drawX, drawY, diameter, diameter);
+        g2d.setColor(Color.BLACK);
+        g2d.drawOval(drawX, drawY, diameter, diameter);
+    }
+
+   
+    // Manager: handles spawn interval, lifespan and the max cap
+   
+
+    public static class Manager {
+        private final List<Obstacle> obstacles = new ArrayList<>();
+
+        private final int frameWidth;
+        private final int frameHeight;
+        private final long spawnIntervalMillis;
+        private final long lifespanMillis;
+        private final int maxObstacles;
+
+        private long lastSpawnTime;
+
+        public Manager(int frameWidth, int frameHeight,
+                        long spawnIntervalMillis, long lifespanMillis) {
+            this(frameWidth, frameHeight, spawnIntervalMillis, lifespanMillis, 3);
+        }
+
+        public Manager(int frameWidth, int frameHeight,
+                        long spawnIntervalMillis, long lifespanMillis, int maxObstacles) {
+            this.frameWidth = frameWidth;
+            this.frameHeight = frameHeight;
+            this.spawnIntervalMillis = spawnIntervalMillis;
+            this.lifespanMillis = lifespanMillis;
+            this.maxObstacles = maxObstacles;
+            this.lastSpawnTime = System.currentTimeMillis();
+        }
+
+        public void update() {
+            obstacles.removeIf(Obstacle::isExpired);
+
+            long now = System.currentTimeMillis();
+            if (now - lastSpawnTime >= spawnIntervalMillis) {
+                lastSpawnTime = now;
+                if (obstacles.size() < maxObstacles) {
+                    obstacles.add(Obstacle.spawnRandom(frameWidth, frameHeight, lifespanMillis, obstacles));
+                }
+            }
+        }
+
+        public List<Obstacle> getObstacles() {
+            return obstacles;
+        }
+
+        public void render(Graphics2D g2d) {
+            for (Obstacle o : obstacles) {
+                o.render(g2d);
+            }
+        }
+    }
 }
