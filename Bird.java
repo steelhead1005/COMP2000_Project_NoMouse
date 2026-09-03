@@ -1,3 +1,6 @@
+import java.awt.Graphics2D;
+import java.util.List;
+
 public class Bird extends Entity {
      
     private double mass = 1.0;
@@ -19,7 +22,7 @@ public class Bird extends Entity {
 
     @Override
     //needs bird list param
-    public void update() {
+    public void update(List<Entity> list) {
         // add and apply force calculations i.e. seperation, cohesion, alignment
         updatePosition(); 
     }
@@ -38,7 +41,7 @@ public class Bird extends Entity {
     }
 
     @Override
-    public void render() {
+    public void render(Graphics2D g2d) {
     // drawing logic
     }
 

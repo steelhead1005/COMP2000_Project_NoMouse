@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-class Obstacle {
+class Obstacle extends Entity {
 
     private static Random RNG = new Random();
 
@@ -15,8 +15,7 @@ class Obstacle {
     private long lifespanMillis;
 
     public Obstacle(double x, double y, double radius, long lifespanMillis) {
-        this.x = x;
-        this.y = y;
+        super(x, y);
         this.radius = radius;
         this.spawnTimeMillis = System.currentTimeMillis();
         this.lifespanMillis = lifespanMillis;
@@ -125,6 +124,7 @@ class Obstacle {
     }
 
 // might need to remove this render method if it causes issues with the graphics context
+    @Override
     public void render(Graphics2D g2d) {
         int drawX = (int) (x - radius);
         int drawY = (int) (y - radius);
@@ -135,7 +135,9 @@ class Obstacle {
         g2d.setColor(Color.BLACK);
         g2d.drawOval(drawX, drawY, diameter, diameter);
     }
-
+    //just adding this for the compiler
+    @Override
+    public void update(List<Entity> list) {}
    
     // Manager: handles spawn interval, lifespan and the max cap
    
@@ -165,7 +167,7 @@ class Obstacle {
             this.maxObstacles = maxObstacles;
             this.lastSpawnTime = System.currentTimeMillis();
         }
-
+        
         public void update() {
             obstacles.removeIf(Obstacle::isExpired);
 
