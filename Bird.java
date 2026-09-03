@@ -1,7 +1,6 @@
 import java.awt.Graphics2D;
-import java.util.List;
 
-public class Bird extends Entity {
+public class Bird extends MovingEntity {
      
     private double mass = 1.0;
 
@@ -20,9 +19,9 @@ public class Bird extends Entity {
         this.ay += forceY / this.mass;
     }
 
-    @Override
+    //@Override
     //needs bird list param
-    public void update(List<Entity> list) {
+    public void update() {
         // add and apply force calculations i.e. seperation, cohesion, alignment
         updatePosition(); 
     }

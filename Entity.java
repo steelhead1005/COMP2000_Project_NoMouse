@@ -1,15 +1,13 @@
 import java.awt.Graphics2D;
-import java.util.List;
 
 public abstract class Entity {
     protected double x, y;
-    protected double dx, dy;
 
-    public Entity(double x, double y) {
+    protected Entity(double x, double y) {
         this.x = x;
         this.y = y;
     }
-    public abstract void update(List<Entity> list);
+    //public abstract void update();
     public abstract void render(Graphics2D g2d);
 
     public double distanceTo(Entity other) {
