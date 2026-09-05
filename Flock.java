@@ -11,5 +11,13 @@ public class Flock {
     public void addBird(Bird b) {
         birds.add(b);
     }
+
+    public int countBirds(){
+        return birds.size();
+    }
+
+    public void resetFlock(){
+        birds.clear();
+    }
 }
 
