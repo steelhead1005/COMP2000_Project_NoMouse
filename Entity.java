@@ -15,4 +15,13 @@ public abstract class Entity {
         double diffY = this.y - other.y;
         return Math.sqrt(diffX * diffX + diffY * diffY);
     }
+
+    public double getX() {
+        return x;
+    }
+
+     public double getY() {
+        return y;
+    }
+    
 }

@@ -14,14 +14,20 @@ NOTES:
  */
 
 public class App {
-    Frame frame = new Frame("Flock Simulation");
-    Panel flockPanel = new Panel();
-    Panel sliderPanel = new Panel();
-    JSlider separation = new JSlider();
-    JSlider alignment = new JSlider();
-    JSlider piller = new JSlider();
+    private final World world = new World(400, 400);
+    private final FlockPanel flockPanel = new FlockPanel(world);
+
+    private final Frame frame = new Frame("Flock Simulation");
+    private final Panel sliderPanel = new Panel();
+
+    private final JSlider separation = new JSlider();
+    private final JSlider alignment = new JSlider();
+    private final JSlider piller = new JSlider();
+
 
         public App() {
+            // Create the predator when the simulation starts.
+            world.addPredator(new Predator(200, 200));
             // Setting flockPanel paramaters
             //flockPanel.setBounds(0, 0, 200, 200);
             flockPanel.setBackground(Color.gray);
@@ -34,9 +40,14 @@ public class App {
             // Add panels to Frame and set Frame layout
             frame.add(flockPanel);
             frame.add(sliderPanel);
-            frame.setSize(400, 600);
+            
+
+            // Set frame layout.
             frame.setLayout(new GridLayout(2, 1, 10, 10));
+
+            //Set frame size and make it visible.
             frame.setVisible(true);
+            frame.setSize(400, 600);
 
             //Add Slider to sliderPanel
             sliderPanel.add(separation);
@@ -47,6 +58,7 @@ public class App {
                 // If window closes, exit the program.
             frame.addWindowListener(
                 new WindowAdapter() {
+                    @Override 
                     public void
                     windowClosing(WindowEvent we) {
                         System.exit(0);
