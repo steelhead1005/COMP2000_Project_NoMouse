@@ -7,22 +7,29 @@ import java.util.Random;
 public class Obstacle extends Entity {
 
     private static Random RNG = new Random();
-
     private double x;
     private double y;
     private double radius;
     private long spawnTimeMillis;
     private long lifespanMillis;
 
-    public Obstacle(double x, double y, double radius, long lifespanMillis) {
+    public Obstacle(double x, double y, double radius, long lifespanMillis) { // Constructor for obstacle
         super(x, y); 
+        if( radius <= 0) {
+            throw new IllegalArgumentException("Radius must be positive.");
+        }
         this.radius = radius;
         this.spawnTimeMillis = System.currentTimeMillis();
         this.lifespanMillis = lifespanMillis;
     }
 
+    public static class SpawnException extends Exception {
+        public SpawnException(String message){
+            super(message);
+        }
+    }
     
-    public static Obstacle spawnRandom(int frameWidth, int frameHeight, long lifespanMillis, List<Obstacle> existing) {
+    public static Obstacle spawnRandom(int frameWidth, int frameHeight, long lifespanMillis, List<? extends Obstacle> existing) throws SpawnException {
         double minDim = Math.min(frameWidth, frameHeight);
         double minDiameter = minDim / 12.0;
         double maxDiameter = minDim / 8.0;
@@ -44,10 +51,10 @@ public class Obstacle extends Entity {
             }
         }
 
-        return candidate;
+        throw new SpawnException("No valid spot found after " + maxAttempts + " attempts");
     }
 
-    public boolean isExpired() {
+    public boolean isExpired() { //checks if the obstacle has exceeded its lifespan
         return System.currentTimeMillis() - spawnTimeMillis >= lifespanMillis;
     }
 
@@ -74,7 +81,7 @@ public class Obstacle extends Entity {
         return distanceTo(other.x, other.y) < (this.radius + other.radius);
     }
 
-    public boolean overlapsAny(List<Obstacle> others) {
+    public boolean overlapsAny(List<? extends Obstacle> others) {
         for (Obstacle o : others) {
             if (this.overlaps(o)) return true;
         }
@@ -86,8 +93,8 @@ public class Obstacle extends Entity {
     // ---------------------------------------------------------------
  
     /**
-     * Simple radial repulsion steering force. Call this once per boid per
-     * frame and add the result to the boid's acceleration/velocity.
+     * Calculates the avoidance force that a boid should apply to avoid this obstacle. The force is stronger the closer the boid is to the obstacle, and it is zero if the boid is outside the avoidance zone.
+     * 
      *
      * @param boidX      boid's current x position
      * @param boidY      boid's current y position
@@ -137,8 +144,6 @@ public class Obstacle extends Entity {
 
    
     // Manager: handles spawn interval, lifespan and the max cap
-   
-
     public static class Manager {
         private final List<Obstacle> obstacles = new ArrayList<>();
 
@@ -167,13 +172,16 @@ public class Obstacle extends Entity {
 
         public void update() {
             obstacles.removeIf(Obstacle::isExpired);
-
             long now = System.currentTimeMillis();
             if (now - lastSpawnTime >= spawnIntervalMillis) {
                 lastSpawnTime = now;
                 if (obstacles.size() < maxObstacles) {
+                    try{
                     obstacles.add(Obstacle.spawnRandom(frameWidth, frameHeight, lifespanMillis, obstacles));
+                } catch(SpawnException e){
+                    System.out.println(e.getMessage());
                 }
+             }
             }
         }
 
