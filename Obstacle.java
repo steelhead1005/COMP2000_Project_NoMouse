@@ -18,7 +18,9 @@ public class Obstacle extends Entity {
         if( radius <= 0) {
             throw new IllegalArgumentException("Radius must be positive.");
         }
-        this.radius = radius;
+        else {
+            this.radius = radius;
+        }
         this.spawnTimeMillis = System.currentTimeMillis();
         this.lifespanMillis = lifespanMillis;
     }
@@ -42,8 +44,8 @@ public class Obstacle extends Entity {
             double radius = diameter / 2.0;
 
             // Keep the whole circle inside the frame bounds.
-            double x = radius + RNG.nextDouble() * Math.max(0, frameWidth - 2 * radius);
-            double y = radius + RNG.nextDouble() * Math.max(0, frameHeight - 2 * radius);
+            double x = radius + RNG.nextDouble() * Math.max(0, frameWidth - diameter);
+            double y = radius + RNG.nextDouble() * Math.max(0, frameHeight - diameter);
 
             candidate = new Obstacle(x, y, radius, lifespanMillis);
             if (existing == null || !candidate.overlapsAny(existing)) {
@@ -66,7 +68,7 @@ public class Obstacle extends Entity {
     public double getY() { return y; }
     public double getRadius() { return radius; }
 
-    public double distanceTo(double px, double py) {
+    public double distanceTo(double px, double py) { //calculates the distance from the center of the obstacle to a point (px, py)
         double dx = px - x;
         double dy = py - y;
         return Math.sqrt(dx * dx + dy * dy);
@@ -106,31 +108,28 @@ public class Obstacle extends Entity {
      *         avoidance zone
      */
 
-    public double[] computeAvoidanceForce(double boidX, double boidY,
-                                           double avoidMargin, double maxForce) {
+    public double[] computeAvoidanceForce(double boidX, double boidY, double avoidMargin, double maxForce) {
         double dx = boidX - x;
         double dy = boidY - y;
-        double dist = Math.sqrt(dx * dx + dy * dy);
-        double safeDist = radius + avoidMargin;
+        double dist = Math.sqrt(dx * dx + dy * dy); // distance from boid to center of obstacle
+        double safeDist = radius + avoidMargin; // distance at which the boid starts to react
 
         if (dist >= safeDist) {
-            return new double[]{0, 0};
+            return new double[]{0, 0}; // no force if the boid is outside the avoidance zone
         }
         if (dist == 0) {
-            // Boid is exactly on the center; push it in an arbitrary direction.
-            return new double[]{maxForce, 0};
+            return new double[]{maxForce, 0}; // Boid is exactly on the center; push it in an arbitrary direction.
         }
 
         double overlap = safeDist - dist;          
         double strength = (overlap / safeDist) * maxForce; 
-
-        double nx = dx / dist;
-        double ny = dy / dist;
+        double nx = dx / dist; 
+        double ny = dy / dist; 
 
         return new double[]{nx * strength, ny * strength};
     }
 
-// might need to remove this render method if it causes issues with the graphics context
+    // might need to remove this render method if it causes issues with the graphics context
     public void render(Graphics2D g2d) {
         int drawX = (int) (x - radius);
         int drawY = (int) (y - radius);
@@ -146,22 +145,20 @@ public class Obstacle extends Entity {
     // Manager: handles spawn interval, lifespan and the max cap
     public static class Manager {
         private final List<Obstacle> obstacles = new ArrayList<>();
-
         private final int frameWidth;
         private final int frameHeight;
         private final long spawnIntervalMillis;
         private final long lifespanMillis;
         private final int maxObstacles;
-
         private long lastSpawnTime;
 
-        public Manager(int frameWidth, int frameHeight,
-                        long spawnIntervalMillis, long lifespanMillis) {
+        // Constructor 1 with default maxObstacles set
+        public Manager(int frameWidth, int frameHeight, long spawnIntervalMillis, long lifespanMillis) {
             this(frameWidth, frameHeight, spawnIntervalMillis, lifespanMillis, 3);
         }
 
-        public Manager(int frameWidth, int frameHeight,
-                        long spawnIntervalMillis, long lifespanMillis, int maxObstacles) {
+        // Constructor 2 which allows the user to set the maxObstacles
+        public Manager(int frameWidth, int frameHeight, long spawnIntervalMillis, long lifespanMillis, int maxObstacles) {
             this.frameWidth = frameWidth;
             this.frameHeight = frameHeight;
             this.spawnIntervalMillis = spawnIntervalMillis;
@@ -170,6 +167,8 @@ public class Obstacle extends Entity {
             this.lastSpawnTime = System.currentTimeMillis();
         }
 
+
+        // Manages spawning and removing of obstacles
         public void update() {
             obstacles.removeIf(Obstacle::isExpired);
             long now = System.currentTimeMillis();
@@ -185,10 +184,12 @@ public class Obstacle extends Entity {
             }
         }
 
+
         public List<Obstacle> getObstacles() {
             return obstacles;
         }
 
+        // Renders all obstacles in the list
         public void render(Graphics2D g2d) {
             for (Obstacle o : obstacles) {
                 o.render(g2d);
