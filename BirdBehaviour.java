@@ -3,7 +3,7 @@ import java.util.*;
 public final class BirdBehaviour {
     public static class Separation implements Behaviour<Bird> {
         public /*Maybe make vector class*/ void  calculate(Bird self, World world) {
-            List<Bird> neighbors = calculateNeighbors(self, world, 25.0);
+            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 25.0);
             double forceX = 0, forceY = 0;
             
             for (Bird other : neighbors) {
@@ -18,7 +18,7 @@ public final class BirdBehaviour {
     }
     public static class Alignment implements Behaviour<Bird> {
         public void calculate(Bird self, World world) {
-            List<Bird> neighbors = calculateNeighbors(self, world, 50.0);
+            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50.0);
             if (neighbors.isEmpty()) return;
             
             double avgDx = 0, avgDy = 0;
@@ -34,7 +34,7 @@ public final class BirdBehaviour {
     }
     public static class Cohesion implements Behaviour<Bird> {
         public void calculate(Bird self, World world) {
-            List<Bird> neighbors = calculateNeighbors(self, world, 50.0);
+            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50);
             if (neighbors.isEmpty()) return;
             
             double centerX = 0, centerY = 0;
@@ -50,20 +50,5 @@ public final class BirdBehaviour {
         }
     }
     
-    public static List<Bird> calculateNeighbors(Bird self, World world, double x) {
-        List<Bird> allBirds = world.getBirds();
-        List<Bird> neighbors = new ArrayList<>();
-
-        for (Bird other : allBirds) {
-            if (other == self) continue;
-
-            double d = self.distanceTo(other);
-
-            if (d < x) {
-                neighbors.add(other);
-            }
-        }
-        return neighbors;
-    }
 }
 
