@@ -35,6 +35,10 @@ public class App {
             //sliderPanel.setBounds(0, 400, 200, 200);
             sliderPanel.setBackground(Color.blue);
 
+            for (int i = 0; i < 50; i++) {
+                world.addBird(new Bird(Math.random() * 400, Math.random() * 400));
+            }
+
             
             
             // Add panels to Frame and set Frame layout
@@ -65,6 +69,11 @@ public class App {
                     }
                 }
             );
+            Timer timer = new Timer(16, e -> {
+                world.update();
+                flockPanel.repaint();
+            });
+            timer.start();
     }
     //for testing purposess will be moved later
     public static void main(String[] args) {

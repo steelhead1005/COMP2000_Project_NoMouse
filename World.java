@@ -33,6 +33,9 @@ public class World {
     for (Predator predator : predators) {
         predator.update(birds);
     }
+    for (Bird bird : birds) {
+        bird.update(this);
+    }
 }
 
 
