@@ -34,7 +34,7 @@ public class Bird extends MovingEntity {
         cohesion.calculate(this, world);
         
         updatePosition();
-        wrapAround(400, 400);
+        wrapAround(600, 600);
     }
     private void updatePosition() {
         // Acceleration changes velocity
