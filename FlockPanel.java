@@ -20,17 +20,23 @@ public class FlockPanel extends JPanel {
 
         // Draw all birds.
         for (Bird bird : world.getBirds()) {
-            bird.render(g2d);
+            if (bird != null) {
+                bird.render(g2d);
+            }
         }
 
         // Draw all obstacles.
         for (Obstacle obstacle : world.getObstacles()) {
-            obstacle.render(g2d);
+            if (obstacle != null) {
+                obstacle.render(g2d);
+            }
         }
 
         // Draw all predators.
         for (Predator predator : world.getPredators()) {
-            predator.render(g2d);
+            if (predator != null) {
+                predator.render(g2d);
+            }
         }
     }
 }
