@@ -25,7 +25,9 @@ public class Predator extends MovingEntity {
     private Bird findClosestBird(List<Bird> birds) {
         Bird closestBird = null;
         double closestDistance = Double.MAX_VALUE;
-
+        if(birds.isEmpty()) {
+            return null;
+        }
         for (Bird bird : birds) {
             double distance = distanceTo(bird);
 
@@ -39,6 +41,13 @@ public class Predator extends MovingEntity {
     }
 
     private void moveTowards(Bird bird) {
+        
+        if (bird == null) {
+            dx = 0;
+            dy = 0;
+            return;
+        }
+
         double differenceX = bird.getX() - x;
         double differenceY = bird.getY() - y;
 
