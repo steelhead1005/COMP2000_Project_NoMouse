@@ -1,66 +1,52 @@
-public class BirdBehaviour implements Behaviour<Bird> {
+import java.util.*;
 
-public World update(World world) {
-    double perceptionRadius = 50.0;
-    double separationRadius = 25.0;
+public final class BirdBehaviour {
+    public static class Separation implements Behaviour<Bird> {
+        public /*Maybe make vector class*/ void  calculate(Bird self, World world) {
+            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 25.0);
+            double forceX = 0, forceY = 0;
 
-    double sepX = 0, sepY = 0;
-    double alignX = 0, alignY = 0;
-    double cohX = 0, cohY = 0;
-
-    int totalNeighbors = 0;
-    int sepNeighbors = 0;
-
-    for (Bird other : allBirds) {
-        if (other == this) continue;
-
-        double d = this.distanceTo(other);
-
-        if (d > 0 && d < perceptionRadius) {
-            // Alignment: sum neighbor velocities
-            alignX += other.dx;
-            alignY += other.dy;
-
-
-            // Cohesion: sum neighbor positions
-            cohX += other.x;
-            cohY += other.y;
-            totalNeighbors++;
-
-            // Separation: sum vectors pointing away from close neighbors
-            if (d < separationRadius) {
-                double diffX = this.x - other.x;
-                double diffY = this.y - other.y;
-
-                // Weight the separation force inversely by distance
-                sepX += (diffX / d) / d;
-                sepY += (diffY / d) / d;
-                sepNeighbors++;
+            for (Bird other : neighbors) {
+                double dist = self.distanceTo(other);
+                if (dist > 0) {
+                    forceX += (self.getX() - other.getX()) / dist; 
+                    forceY += (self.getY() - other.getY()) / dist;
+                }
             }
+            self.applyForce(forceX * 1.5, forceY * 1.5);
         }
     }
-
-    if (totalNeighbors > 0) {
-        // Alignment: (Average Velocity) - Current Velocity
-        alignX = (alignX / totalNeighbors) - this.dx;
-        alignY = (alignY / totalNeighbors) - this.dy;
-
-        // Cohesion: (Vector towards Average Position) - Current Velocity
-        cohX = (cohX / totalNeighbors) - this.x;
-        cohY = (cohY / totalNeighbors) - this.y;
-
-        this.applyForce(alignX * 0.05, alignY * 0.05);
-        this.applyForce(cohX * 0.005, cohY * 0.005);
+    public static class Alignment implements Behaviour<Bird> {
+        public void calculate(Bird self, World world) {
+            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50.0);
+            if (neighbors.isEmpty()) return;
+ 
+            double avgDx = 0, avgDy = 0;
+            for (Bird other : neighbors) {
+                avgDx += other.getVelocityX();
+                avgDy += other.getVelocityY();
+            }
+            avgDx /= neighbors.size();
+            avgDy /= neighbors.size();
+ 
+            self.applyForce((avgDx - self.getVelocityX()) * 0.05, (avgDy - self.getVelocityY()) * 0.05);
+        }
     }
+    public static class Cohesion implements Behaviour<Bird> {
+        public void calculate(Bird self, World world) {
+            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50);
+            if (neighbors.isEmpty()) return;
 
-    if (sepNeighbors > 0) {
-        // Separation: Average escape vector
-        sepX /= sepNeighbors;
-        sepY /= sepNeighbors;
-        this.applyForce(sepX * 1.5, sepY * 1.5);
-    }
+            double centerX = 0, centerY = 0;
+            for (Bird other : neighbors) {
+                centerX += other.getX();
+                centerY += other.getY();
+            }
+            centerX /= neighbors.size();
+            centerY /= neighbors.size(); 
 
-    updatePosition();
-    limitVelocity(4.0);
-    }
+            self.applyForce((centerX - self.getX()) * 0.01, (centerY - self.getY()) * 0.01);
+        }
+    } 
 }
+

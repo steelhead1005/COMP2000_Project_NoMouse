@@ -30,11 +30,22 @@ public class World {
         
     }
     public void update() {
-    for (Predator predator : predators) {
-        predator.update(birds);
+        for (Predator predator : predators) {
+            predator.update(birds);
+        }
+        for (Bird bird : birds) {
+            bird.update(this);
+        }
     }
-}
-
+    public <T extends Entity> List<T> getEntitiesInRange(List<T> entities, Entity center, double radius) {
+        List<T> inRange = new ArrayList<>();
+        for (T entity : entities) {
+            if (entity != center && center.distanceTo(entity) < radius) {
+                inRange.add(entity);
+            }
+        }
+        return inRange;
+    }
 
     public List<Bird> getBirds() {
         return birds;

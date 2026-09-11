@@ -2,6 +2,11 @@ import java.awt.Graphics2D;
 
 public abstract class Entity {
     protected double x, y;
+    
+    protected Entity(){
+        x = 0;
+        y = 0;
+    }
 
     protected Entity(double x, double y) {
         this.x = x;
@@ -24,4 +29,9 @@ public abstract class Entity {
         return y;
     }
     
+    public void setPosition(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
 }

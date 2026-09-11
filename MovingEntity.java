@@ -12,6 +12,17 @@ public abstract class MovingEntity extends Entity {
         return dy;
     }
 
+    public double getAccelerationX() {
+        return ax;
+    }
+
+    public double getAccelerationY() {
+        return ay;
+    }
+
+    public void set(double x, double y) {
+        super.setPosition(x, y);
+    }
 
      protected void limitVelocity(double maximumSpeed) {
         double speed = Math.sqrt(dx * dx + dy * dy);

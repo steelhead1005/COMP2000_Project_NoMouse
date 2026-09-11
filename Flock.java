@@ -9,15 +9,22 @@ public class Flock {
     }
 
     public void addBird(Bird b) {
-        birds.add(b);
+        if(birds != null){
+            birds.add(b);
+        }
     }
 
     public int countBirds(){
+        if(birds == null){
+            return 0;
+        }
         return birds.size();
     }
 
     public void resetFlock(){
-        birds.clear();
+        if(birds != null){
+            birds.clear();
+        }
     }
 }
 

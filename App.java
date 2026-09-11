@@ -14,7 +14,7 @@ NOTES:
  */
 
 public class App {
-    private final World world = new World(400, 400);
+    private final World world = new World(600, 600);
     private final FlockPanel flockPanel = new FlockPanel(world);
 
     private final Frame frame = new Frame("Flock Simulation");
@@ -34,6 +34,10 @@ public class App {
             // Setting sliderPanel paramaters
             //sliderPanel.setBounds(0, 400, 200, 200);
             sliderPanel.setBackground(Color.blue);
+
+            for (int i = 0; i < 100; i++) {
+                world.addBird(new Bird(Math.random() * 400, Math.random() * 400));
+            }
 
             
             
@@ -65,6 +69,11 @@ public class App {
                     }
                 }
             );
+            Timer timer = new Timer(16, e -> {
+                world.update();
+                flockPanel.repaint();
+            });
+            timer.start();
     }
     //for testing purposess will be moved later
     public static void main(String[] args) {
