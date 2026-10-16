@@ -45,12 +45,24 @@ public class World {
     }
     public void update() {
         for (Predator predator : predators) {
-            predator.update(birds);
+            predator.update(birds, obstacles);
+            resolvePillarCollisions(predator, predator.getBodyRadius());
         }
         for (Bird bird : birds) {
+            obstacles.stream()
+                    .map(obstacle -> obstacle.computeAvoidanceForce(bird.getX(), bird.getY(), 45, 2.5))
+                    .forEach(force -> bird.applyForce(force[0], force[1]));
             bird.update(this);
+            resolvePillarCollisions(bird, 4);
         }
     }
+    private void resolvePillarCollisions(MovingEntity entity, double padding) {
+        obstacles.stream()
+                .filter(obstacle -> obstacle instanceof PillarObstacle)
+                .map(obstacle -> (PillarObstacle) obstacle)
+                .forEach(pillar -> pillar.resolveCollision(entity, padding));
+    }
+
     public <T extends Entity> List<T> getEntitiesInRange(List<T> entities, Entity center, double radius) {
         if (entities == null || center == null) {
         throw new IllegalArgumentException("Entities list and center entity cannot be null.");

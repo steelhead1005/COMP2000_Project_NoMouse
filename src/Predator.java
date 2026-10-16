@@ -39,7 +39,13 @@ public abstract class Predator extends MovingEntity {
 
     protected abstract double getDetectionRadius();
 
+    public double getBodyRadius() { return size; }
+
     public void update(List<? extends Bird> birds) {
+        update(birds, java.util.Collections.emptyList());
+    }
+
+    public void update(List<? extends Bird> birds, List<Obstacle> obstacles) {
         // Keep a valid target instead of switching between nearby birds every frame.
         if (target == null || !birds.contains(target)
                 || distanceTo(target) >= getDetectionRadius()) {
@@ -51,7 +57,7 @@ public abstract class Predator extends MovingEntity {
         }
         dx = 0;
         dy = 0;
-        if (target != null) moveTowards(target);
+        if (target != null) moveTowards(target, obstacles);
         x += dx;
         y += dy;
     }
@@ -64,8 +70,14 @@ public abstract class Predator extends MovingEntity {
                 .orElse(null);
     }
 
-    private void moveTowards(Bird bird) {
-        double desiredHeading = Math.atan2(bird.getY() - y, bird.getX() - x);
+    private void moveTowards(Bird bird, List<Obstacle> obstacles) {
+        double distance = Math.max(0.001, distanceTo(bird));
+        double[] avoidance = obstacles.stream()
+                .map(obstacle -> obstacle.computeAvoidanceForce(x, y, size + 60, 4))
+                .reduce(new double[] {0, 0}, (sum, force) ->
+                        new double[] {sum[0] + force[0], sum[1] + force[1]});
+        double desiredHeading = Math.atan2((bird.getY() - y) / distance + avoidance[1],
+                (bird.getX() - x) / distance + avoidance[0]);
         if (!hasHeading) {
             heading = desiredHeading;
             hasHeading = true;

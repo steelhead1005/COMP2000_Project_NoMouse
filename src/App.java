@@ -14,6 +14,8 @@ NOTES:
 public class App {
     private final World world = new World(600, 600);
     private final FlockPanel flockPanel = new FlockPanel(world);
+    private final PillarObstacle leftPillar = new PillarObstacle(0, 220, 128, 40);
+    private final PillarObstacle bottomPillar = new PillarObstacle(200, 260, 32, 140);
 
     private final Frame frame = new Frame("Flock Simulation");
     private final Panel sliderPanel = new Panel();
@@ -34,6 +36,8 @@ public class App {
             } catch (IllegalArgumentException e) {
                 System.err.println("Failed to add predator: " + e.getMessage());
             }
+            world.addObstacle(leftPillar);
+            world.addObstacle(bottomPillar);
             // Setting flockPanel paramaters
             flockPanel.setBounds(0, 0, 400, 400);
             flockPanel.setBackground(bgColor);
@@ -81,6 +85,11 @@ public class App {
                     Dimension d = e.getComponent().getSize();
                     flockPanel.setBounds(0, 0, d.width, d.height * 2/3);
                     sliderPanel.setBounds(0, 400, d.width, d.height / 3);
+                    double viewWidth = Math.max(1, flockPanel.getWidth());
+                    double viewHeight = Math.max(1, flockPanel.getHeight());
+                    leftPillar.setBounds(0, viewHeight * 0.55, viewWidth * 0.32, viewHeight * 0.1);
+                    bottomPillar.setBounds(viewWidth * 0.5, viewHeight * 0.65,
+                            viewWidth * 0.08, viewHeight * 0.35);
                 }
             });
 
