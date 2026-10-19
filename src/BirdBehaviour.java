@@ -1,19 +1,26 @@
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public final class BirdBehaviour {
+    private static Collector<Bird, double[], double[]> repulsionFrom(Bird self) {
+    return Collector.of(
+            () -> new double[2],
+            (force, other) -> {
+                double dist = self.distanceTo(other);
+                if (dist > 0) {
+                    force[0] += (self.getX() - other.getX()) / dist;
+                    force[1] += (self.getY() - other.getY()) / dist;
+                }
+            },
+            (a, b) -> { a[0] += b[0]; a[1] += b[1]; return a; },
+            Collector.Characteristics.UNORDERED);
+    }
     public static class Separation implements Behaviour<Bird> {
         public /*Maybe make vector class*/ void  calculate(Bird self, World world) {
             List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 25.0);
-            double forceX = 0, forceY = 0;
-
-            for (Bird other : neighbors) {
-                double dist = self.distanceTo(other);
-                if (dist > 0) {
-                    forceX += (self.getX() - other.getX()) / dist; 
-                    forceY += (self.getY() - other.getY()) / dist;
-                }
-            }
-            self.applyForce(forceX * 1.5, forceY * 1.5);
+            double[] force = neighbors.stream().collect(repulsionFrom(self));
+            self.applyForce(force[0] * 1.5, force[1] * 1.5);
         }
     }
     public static class Alignment implements Behaviour<Bird> {
@@ -21,10 +28,12 @@ public final class BirdBehaviour {
             List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50.0);
             if (neighbors.isEmpty()) return;
  
-            double avgDx = neighbors.stream().mapToDouble(Bird::getVelocityX).average().orElse(0);
-            double avgDy = neighbors.stream().mapToDouble(Bird::getVelocityY).average().orElse(0);
- 
-            self.applyForce((avgDx - self.getVelocityX()) * 0.05, (avgDy - self.getVelocityY()) * 0.05);
+            double[] avg = neighbors.stream().collect(Collectors.teeing(
+                Collectors.averagingDouble(Bird::getVelocityX),
+                Collectors.averagingDouble(Bird::getVelocityY),
+                (avgDx, avgDy) -> new double[]{avgDx, avgDy}));
+
+            self.applyForce((avg[0] - self.getVelocityX()) * 0.05, (avg[1] - self.getVelocityY()) * 0.05);
         }
     }
     public static class Cohesion implements Behaviour<Bird> {
@@ -32,10 +41,12 @@ public final class BirdBehaviour {
             List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50);
             if (neighbors.isEmpty()) return;
 
-            double centerX = neighbors.stream().mapToDouble(Bird::getX).average().orElse(0);
-            double centerY = neighbors.stream().mapToDouble(Bird::getY).average().orElse(0);
+            double[] center = neighbors.stream().collect(Collectors.teeing(
+                Collectors.averagingDouble(Bird::getX),
+                Collectors.averagingDouble(Bird::getY),
+                (centerX, centerY) -> new double[]{centerX, centerY}));
 
-            self.applyForce((centerX - self.getX()) * 0.01, (centerY - self.getY()) * 0.01);
+            self.applyForce((center[0] - self.getX()) * 0.01, (center[1] - self.getY()) * 0.01);
         }
     } 
 }
