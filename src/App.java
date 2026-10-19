@@ -14,6 +14,8 @@ NOTES:
 public class App {
     private final World world = new World(600, 600);
     private final FlockPanel flockPanel = new FlockPanel(world);
+    private final PillarObstacle leftPillar = new PillarObstacle(0, 220, 128, 40);
+    private final PillarObstacle bottomPillar = new PillarObstacle(200, 260, 32, 140);
 
     private final Frame frame = new Frame("Flock Simulation");
     private final Panel sliderPanel = new Panel();
@@ -22,17 +24,23 @@ public class App {
     private final JSlider alignment = new JSlider();
     private final JSlider piller = new JSlider();
 
+    //RGB Color of background
+    private final Color bgColor = new Color(100,100,255);
+
 
         public App() {
-            // Create the predator when the simulation starts.
+            // Create both predator types when the simulation starts.
             try {
-                world.addPredator(new Predator(200, 200));
+                world.addPredator(new ChaserPredator(200, 200));
+                world.addPredator(new AmbushPredator(350, 250));
             } catch (IllegalArgumentException e) {
                 System.err.println("Failed to add predator: " + e.getMessage());
             }
+            world.addObstacle(leftPillar);
+            world.addObstacle(bottomPillar);
             // Setting flockPanel paramaters
             flockPanel.setBounds(0, 0, 400, 400);
-            flockPanel.setBackground(Color.blue);
+            flockPanel.setBackground(bgColor);
             // Setting sliderPanel paramaters
             sliderPanel.setBounds(0, 400, 400, 200);
             sliderPanel.setBackground(Color.gray);
@@ -77,6 +85,11 @@ public class App {
                     Dimension d = e.getComponent().getSize();
                     flockPanel.setBounds(0, 0, d.width, d.height * 2/3);
                     sliderPanel.setBounds(0, 400, d.width, d.height / 3);
+                    double viewWidth = Math.max(1, flockPanel.getWidth());
+                    double viewHeight = Math.max(1, flockPanel.getHeight());
+                    leftPillar.setBounds(0, viewHeight * 0.55, viewWidth * 0.32, viewHeight * 0.1);
+                    bottomPillar.setBounds(viewWidth * 0.5, viewHeight * 0.65,
+                            viewWidth * 0.08, viewHeight * 0.35);
                 }
             });
 

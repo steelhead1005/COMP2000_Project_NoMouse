@@ -3,7 +3,7 @@ import java.awt.Graphics2D;
 
 public class Bird extends MovingEntity {
     private double mass = 1.0;
-    private double size = 16.0;
+    private double size = 8.0;
 
     private static final BirdBehaviour.Separation separation = new BirdBehaviour.Separation();
     private static final BirdBehaviour.Alignment alignment = new BirdBehaviour.Alignment();
