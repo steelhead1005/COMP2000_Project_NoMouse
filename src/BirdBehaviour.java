@@ -3,6 +3,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public final class BirdBehaviour {
+    
     private static Collector<Bird, double[], double[]> repulsionFrom(Bird self) {
     return Collector.of(
             () -> new double[2],
@@ -16,14 +17,18 @@ public final class BirdBehaviour {
             (a, b) -> { a[0] += b[0]; a[1] += b[1]; return a; },
             Collector.Characteristics.UNORDERED);
     }
+
     public static class Separation implements Behaviour<Bird> {
+        @Override
         public /*Maybe make vector class*/ void  calculate(Bird self, World world) {
             List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 25.0);
             double[] force = neighbors.stream().collect(repulsionFrom(self));
             self.applyForce(force[0] * 1.5, force[1] * 1.5);
         }
     }
+
     public static class Alignment implements Behaviour<Bird> {
+        @Override
         public void calculate(Bird self, World world) {
             List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50.0);
             if (neighbors.isEmpty()) return;
@@ -36,7 +41,9 @@ public final class BirdBehaviour {
             self.applyForce((avg[0] - self.getVelocityX()) * 0.05, (avg[1] - self.getVelocityY()) * 0.05);
         }
     }
+
     public static class Cohesion implements Behaviour<Bird> {
+        @Override
         public void calculate(Bird self, World world) {
             List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50);
             if (neighbors.isEmpty()) return;
