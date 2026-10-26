@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.util.concurrent.*;
 import javax.swing.*;
 
 /*
@@ -87,9 +88,11 @@ public class App {
                     sliderPanel.setBounds(0, 400, d.width, d.height / 3);
                     double viewWidth = Math.max(1, flockPanel.getWidth());
                     double viewHeight = Math.max(1, flockPanel.getHeight());
-                    leftPillar.setBounds(0, viewHeight * 0.55, viewWidth * 0.32, viewHeight * 0.1);
-                    bottomPillar.setBounds(viewWidth * 0.5, viewHeight * 0.65,
-                            viewWidth * 0.08, viewHeight * 0.35);
+                    synchronized (world) {
+                        leftPillar.setBounds(0, viewHeight * 0.55, viewWidth * 0.32, viewHeight * 0.1);
+                        bottomPillar.setBounds(viewWidth * 0.5, viewHeight * 0.65,
+                                viewWidth * 0.08, viewHeight * 0.35);
+                    }
                 }
             });
 
@@ -103,11 +106,10 @@ public class App {
                     }
                 }
             );
-            Timer timer = new Timer(16, e -> {
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
                 world.update();
                 flockPanel.repaint();
-            });
-            timer.start();
+            }, 0, 16, TimeUnit.MILLISECONDS);
     }
     //for testing purposess will be moved later
     public static void main(String[] args) {
