@@ -3,7 +3,7 @@ import java.awt.Graphics2D;
 
 /** Rectangular pillar; x and y identify its centre, like other entities. */
 public class PillarObstacle extends Obstacle {
-    
+
     private double width;
     private double height;
 
@@ -91,11 +91,16 @@ public class PillarObstacle extends Obstacle {
             int w = (int) Math.round(width);
             int h = (int) Math.round(height);
 
-            g.setColor(new Color(120, 70, 30));
+            //obstacle 1
+            g.setColor(new Color(120, 70, 30)); //RGB: 78461e (middle)
             g.fillRect(left, top, w, h);
-            g.setColor(new Color(190, 140, 85));
+
+            //obstacle 2
+            g.setColor(new Color(190, 140, 85));  //RGB: be8c55 (lightest)
             g.drawLine(left + 2, top + 2, left + w - 2, top + 2);
-            g.setColor(new Color(65, 40, 20));
+
+            //obstacle 3
+            g.setColor(new Color(65, 40, 20));  //RGB: 412814 (darkest)
             g.drawRect(left, top, w, h);
 
         } finally {
