@@ -83,14 +83,21 @@ public class World {
         return birds;
     }
 
+    public int getBirdCount(List<Bird> list){
+        return list.size();
+    }
+
     public List<Obstacle> getObstacles() {
         return obstacles;
     }
 
     public List<Predator> getPredators(){
         return predators;
-
     }
+
+    public int getPredatorCount(List<Predator> list){
+        return list.size();
+    }    
 
 
 } 
