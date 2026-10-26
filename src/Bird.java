@@ -25,11 +25,13 @@ public class Bird extends MovingEntity {
 
     //@Override
     //needs bird list param
-    public void update(World world) {
+    public void computeForces(World world) {
         separation.calculate(this, world);
         alignment.calculate(this, world);
         cohesion.calculate(this, world);
-        
+    }
+
+    public void integrate(World world) {
         updatePosition();
         avoidWalls(world.width, world.height);
     }

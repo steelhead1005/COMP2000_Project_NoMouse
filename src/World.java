@@ -43,18 +43,21 @@ public class World {
         predators.add(predator);
         
     }
-    public void update() {
+    public synchronized void update() {
         for (Predator predator : predators) {
             predator.update(birds, obstacles);
             resolvePillarCollisions(predator, predator.getBodyRadius());
         }
-        for (Bird bird : birds) {
+        birds.parallelStream().forEach(bird -> {
             obstacles.stream()
                     .map(obstacle -> obstacle.computeAvoidanceForce(bird.getX(), bird.getY(), 45, 2.5))
                     .forEach(force -> bird.applyForce(force[0], force[1]));
-            bird.update(this);
+            bird.computeForces(this);
+        });
+        birds.parallelStream().forEach(bird -> {
+            bird.integrate(this);
             resolvePillarCollisions(bird, 4);
-        }
+        });
     }
     private void resolvePillarCollisions(MovingEntity entity, double padding) {
         obstacles.stream()
