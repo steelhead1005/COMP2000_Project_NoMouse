@@ -3,6 +3,7 @@ import java.awt.Graphics2D;
 
 /** Rectangular pillar; x and y identify its centre, like other entities. */
 public class PillarObstacle extends Obstacle {
+    
     private double width;
     private double height;
 
@@ -15,7 +16,8 @@ public class PillarObstacle extends Obstacle {
     public void setBounds(double left, double top, double width, double height) {
         if (!Double.isFinite(left) || !Double.isFinite(top)
                 || !Double.isFinite(width) || !Double.isFinite(height)
-                || width <= 0 || height <= 0) {
+                || width <= 0 || height <= 0) 
+        {
             throw new IllegalArgumentException("Pillar bounds must be finite and dimensions positive");
         }
         this.width = width;
@@ -33,6 +35,7 @@ public class PillarObstacle extends Obstacle {
 
     // Outward direction and distance from the nearest face, including inside starts.
     private double[] surface(double px, double py, double padding) {
+
         double halfWidth = width / 2 + padding;
         double halfHeight = height / 2 + padding;
         double offsetX = px - x;
@@ -42,18 +45,22 @@ public class PillarObstacle extends Obstacle {
         double vx = offsetX - nearestX;
         double vy = offsetY - nearestY;
         double distance = Math.hypot(vx, vy);
+
         if (distance > 0) return new double[] {vx / distance, vy / distance, distance};
         double horizontalDepth = halfWidth - Math.abs(offsetX);
         double verticalDepth = halfHeight - Math.abs(offsetY);
+
         if (horizontalDepth < verticalDepth) {
             return new double[] {offsetX < 0 ? -1 : 1, 0, -horizontalDepth};
         }
+
         return new double[] {0, offsetY < 0 ? -1 : 1, -verticalDepth};
     }
 
     @Override
     public double[] computeAvoidanceForce(double px, double py, double margin, double maxForce) {
         double[] surface = surface(px, py, 0);
+
         if (margin <= 0 || surface[2] >= margin) return new double[] {0, 0};
         double strength = Math.min(1, (margin - surface[2]) / margin) * maxForce;
         // A small tangential component prevents a head-on approach from stalling.
@@ -83,12 +90,14 @@ public class PillarObstacle extends Obstacle {
             int top = (int) Math.round(y - height / 2);
             int w = (int) Math.round(width);
             int h = (int) Math.round(height);
+
             g.setColor(new Color(120, 70, 30));
             g.fillRect(left, top, w, h);
             g.setColor(new Color(190, 140, 85));
             g.drawLine(left + 2, top + 2, left + w - 2, top + 2);
             g.setColor(new Color(65, 40, 20));
             g.drawRect(left, top, w, h);
+
         } finally {
             g.dispose();
         }
