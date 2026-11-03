@@ -3,15 +3,6 @@ import java.awt.event.*;
 import java.util.concurrent.*;
 import javax.swing.*;
 
-/*
-NOTES:
-    fix up sliders
-    add lables to sliders
-    add uses to sliders
-    create piller visule
-    make pretty if time
- */
-
 public class App {
     private final World world = new World(600, 600);
     private final FlockPanel flockPanel = new FlockPanel(world);
@@ -24,7 +15,6 @@ public class App {
     private final JSlider separation = new JSlider();
     private final JSlider alignment = new JSlider();
     private final JSlider cohesion = new JSlider();
-
 
     //creates a slider with the corect labels
     private Panel labelledSlider(String name, JSlider slider, int min, int max, int start) {
@@ -44,7 +34,6 @@ public class App {
     row.add(slider, BorderLayout.CENTER);
     return row;
 }
-
 
     private final ScheduledExecutorService simLoop = Executors.newSingleThreadScheduledExecutor(task -> {
         Thread thread = new Thread(task, "sim-loop");
@@ -85,8 +74,6 @@ public class App {
                     break;
                 }
             }
-
-            
             
             // Add panels to Frame and set Frame layout
             frame.add(flockPanel);
@@ -106,12 +93,8 @@ public class App {
             sliderPanel.add(labelledSlider("Separation", separation, 0, 20, 15));
             sliderPanel.add(labelledSlider("Alignment", alignment, 0, 10, 5));
             sliderPanel.add(labelledSlider("Cohesion", cohesion, 0, 10, 1));
-            //sliderPanel.add(separation);
-            //separation.bounds();
-            //sliderPanel.add(alignment);
-            //sliderPanel.add(piller);
-            //sliderPanel.setLayout(new GridLayout(3, 1, 5, 5));
             
+            //changes value of behaviour based on the slider
             separation.addChangeListener(e -> BirdBehaviour.separationWeight = separation.getValue() / 10.0);
             alignment.addChangeListener(e  -> BirdBehaviour.alignmentWeight  = alignment.getValue() / 100.0);
             cohesion.addChangeListener(e  -> BirdBehaviour.cohesionWeight  = cohesion.getValue() / 100.0);
@@ -152,7 +135,6 @@ public class App {
             }
             }, 0, 16, TimeUnit.MILLISECONDS);
     }
-    //for testing purposess will be moved later
     public static void main(String[] args) {
         new App();
     }
