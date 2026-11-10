@@ -10,6 +10,7 @@ public class Obstacle extends Entity {
     private double radius;
     private long spawnTimeMillis;
     private long lifespanMillis;
+    private double vx, vy;
 
     public Obstacle(double x, double y, double radius, long lifespanMillis) { // Constructor for obstacle
         super(x, y); 
@@ -57,6 +58,33 @@ public class Obstacle extends Entity {
     public boolean isExpired() { //checks if the obstacle has exceeded its lifespan
         return System.currentTimeMillis() - spawnTimeMillis >= lifespanMillis;
     }
+
+    public void setVelocity(double vx, double vy) {
+        if (!Double.isFinite(vx) || !Double.isFinite(vy)) {
+            throw new IllegalArgumentException("Velocity must be finite.");
+        }
+        this.vx = vx;
+        this.vy = vy;
+    }
+
+    public boolean isMoving() {
+        return vx != 0 || vy != 0;
+    }
+
+    public void move(double worldWidth, double worldHeight) {
+        if (!isMoving()) return;
+        x += vx;
+        y += vy;
+        double hw = getHalfWidth();
+        double hh = getHalfHeight();
+        if (x - hw < 0) { x = hw; vx = Math.abs(vx); }
+        else if (x + hw > worldWidth) { x = worldWidth - hw; vx = -Math.abs(vx); }
+        if (y - hh < 0) { y = hh; vy = Math.abs(vy); }
+        else if (y + hh > worldHeight) { y = worldHeight - hh; vy = -Math.abs(vy); }
+    }
+
+    public double getHalfWidth() { return radius; }
+    public double getHalfHeight() { return radius; }
 
     public long getAgeMillis() {
         return System.currentTimeMillis() - spawnTimeMillis;

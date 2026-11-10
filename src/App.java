@@ -4,10 +4,8 @@ import java.util.concurrent.*;
 import javax.swing.*;
 
 public class App {
-    private final World world = new World(600, 600);
+    private final World world = new World(1100, 700);
     private final FlockPanel flockPanel = new FlockPanel(world);
-    private final PillarObstacle leftPillar = new PillarObstacle(0, 220, 128, 40);
-    private final PillarObstacle bottomPillar = new PillarObstacle(200, 260, 32, 140);
 
     private final JFrame frame = new JFrame("Flock Simulation");
     private final JPanel sliderPanel = new JPanel();
@@ -16,10 +14,10 @@ public class App {
     private final JSlider alignment = new JSlider();
     private final JSlider cohesion = new JSlider();
 
-    private final BirdBehaviour.Separation separationRule = new BirdBehaviour.Separation(1.5);
-    private final BirdBehaviour.Alignment alignmentRule = new BirdBehaviour.Alignment(0.05);
-    private final BirdBehaviour.Cohesion cohesionRule = new BirdBehaviour.Cohesion(0.01);
-    private final Behaviour<Bird> fleeRule = BirdBehaviour.fleePredators(80, 1.5);
+    private final BirdBehaviour.Separation separationRule = new BirdBehaviour.Separation(0.5);
+    private final BirdBehaviour.Alignment alignmentRule = new BirdBehaviour.Alignment(0.10);
+    private final BirdBehaviour.Cohesion cohesionRule = new BirdBehaviour.Cohesion(0.003);
+    private final Behaviour<Bird> fleeRule = BirdBehaviour.fleePredators(110, 2.0);
 
 
     //creates a slider with the corect labels
@@ -70,7 +68,7 @@ public class App {
     });
 
     //RGB Color of background
-    private final Color bgColor = new Color(100,100,255);
+    private final Color bgColor = new Color(15, 22, 38);
 
 
         public App() {
@@ -85,15 +83,13 @@ public class App {
             world.addBehaviour(alignmentRule);
             world.addBehaviour(cohesionRule);
             world.addBehaviour(fleeRule);
-            world.addObstacle(leftPillar);
-            world.addObstacle(bottomPillar);
             // Setting flockPanel paramaters
             flockPanel.setBackground(bgColor);
             // Setting sliderPanel paramaters
             sliderPanel.setBackground(Color.gray);
-            sliderPanel.setPreferredSize(new Dimension(600, 160));
+            sliderPanel.setPreferredSize(new Dimension(600, 200));
 
-            for (int i = 0; i < 600; i++) {
+            for (int i = 0; i < 500; i++) {
                 try {
                     world.addBird(new Bird(Math.random() * (int)world.width, Math.random() * (int)world.height));
                 } catch (IllegalArgumentException e) {
@@ -115,10 +111,10 @@ public class App {
 
             //Add Slider to sliderPanel
 
-            sliderPanel.setLayout(new GridLayout(4, 1, 5, 5));   // one row per behaviour
-            sliderPanel.add(labelledSlider("Separation", separation, 0, 20, 15, separationRule));
-            sliderPanel.add(labelledSlider("Alignment", alignment, 0, 10, 5, alignmentRule));
-            sliderPanel.add(labelledSlider("Cohesion", cohesion, 0, 10, 1, cohesionRule));
+            sliderPanel.setLayout(new GridLayout(5, 1, 5, 5));   // one row per behaviour
+            sliderPanel.add(labelledSlider("Separation", separation, 0, 20, 5, separationRule));
+            sliderPanel.add(labelledSlider("Alignment", alignment, 0, 30, 10, alignmentRule));
+            sliderPanel.add(labelledSlider("Cohesion", cohesion, 0, 20, 3, cohesionRule));
 
             JPanel fleeRow = new JPanel(new BorderLayout());
             fleeRow.setOpaque(false);
@@ -128,26 +124,43 @@ public class App {
             fleeRow.add(toggle(fleeRule), BorderLayout.EAST);
             sliderPanel.add(fleeRow);
 
+            JPanel obstacleRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            obstacleRow.setOpaque(false);
+            JComboBox<World.ObstacleShape> shapeBox = new JComboBox<>(World.ObstacleShape.values());
+            JButton spawnButton = new JButton("Spawn obstacle");
+            JCheckBox movingBox = new JCheckBox("Moving", false);
+            movingBox.setOpaque(false);
+            JButton clearButton = new JButton("Clear obstacles");
+            spawnButton.addActionListener(e -> {
+                try {
+                    world.spawnObstacle((World.ObstacleShape) shapeBox.getSelectedItem(),
+                            movingBox.isSelected() ? 1.5 : 0);
+                } catch (Obstacle.SpawnException ex) {
+                    System.out.println(ex.getMessage());
+                }
+            });
+            clearButton.addActionListener(e -> world.clearObstacles());
+            obstacleRow.add(new JLabel("     Shape:"));
+            obstacleRow.add(shapeBox);
+            obstacleRow.add(spawnButton);
+            obstacleRow.add(movingBox);
+            obstacleRow.add(clearButton);
+            sliderPanel.add(obstacleRow);
+
             separation.addChangeListener(e -> separationRule.setWeight(separation.getValue() / 10.0));
             alignment.addChangeListener(e  -> alignmentRule.setWeight(alignment.getValue() / 100.0));
-            cohesion.addChangeListener(e  -> cohesionRule.setWeight(cohesion.getValue() / 100.0));
+            cohesion.addChangeListener(e  -> cohesionRule.setWeight(cohesion.getValue() / 1000.0));
 
             flockPanel.addComponentListener(new ComponentAdapter() {
                 @Override 
                 public void componentResized(ComponentEvent e) {
                     world.changeBounds(Math.max(1, flockPanel.getWidth()), Math.max(1, flockPanel.getHeight()));
-                    double viewWidth = Math.max(1, flockPanel.getWidth());
-                    double viewHeight = Math.max(1, flockPanel.getHeight());
-                    synchronized (world) {
-                        leftPillar.setBounds(0, viewHeight * 0.55, viewWidth * 0.32, viewHeight * 0.1);
-                        bottomPillar.setBounds(viewWidth * 0.5, viewHeight * 0.65,
-                                viewWidth * 0.08, viewHeight * 0.35);
-                    }
                 }
             });
 
             //Set frame size and make it visible.
-            frame.setSize((int)world.width, (int)world.height);
+            frame.setSize((int)world.width, (int)world.height + 240);
+            frame.setLocationRelativeTo(null);
             frame.setVisible(true);
 
             // If window closes, exit the program.

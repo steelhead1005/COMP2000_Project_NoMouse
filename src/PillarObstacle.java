@@ -1,5 +1,7 @@
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.DoubleStream;
 
 /** Rectangular pillar; x and y identify its centre, like other entities. */
@@ -49,8 +51,32 @@ public class PillarObstacle extends Obstacle {
         setPosition(left + width / 2, top + height / 2);
     }
 
+    public static PillarObstacle spawnRandom(double frameWidth, double frameHeight,
+            List<? extends Obstacle> existing) throws SpawnException {
+        Random rng = new Random();
+        double minDim = Math.min(frameWidth, frameHeight);
+        int maxAttempts = 10;
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            double w = minDim * (0.05 + rng.nextDouble() * 0.15);
+            double h = minDim * (0.05 + rng.nextDouble() * 0.15);
+            double left = rng.nextDouble() * Math.max(0, frameWidth - w);
+            double top = rng.nextDouble() * Math.max(0, frameHeight - h);
+            PillarObstacle candidate = new PillarObstacle(left, top, w, h);
+            if (existing == null || !candidate.overlapsAny(existing)) {
+                return candidate;
+            }
+        }
+        throw new SpawnException("No valid spot found after " + maxAttempts + " attempts");
+    }
+
     @Override
     public double getRadius() { return Math.hypot(width, height) / 2; }
+
+    @Override
+    public double getHalfWidth() { return width / 2; }
+
+    @Override
+    public double getHalfHeight() { return height / 2; }
 
     @Override
     public boolean contains(double px, double py) {

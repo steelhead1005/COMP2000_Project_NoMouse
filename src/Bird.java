@@ -3,7 +3,7 @@ import java.awt.Graphics2D;
 
 public class Bird extends MovingEntity {
     private double mass = 1.0;
-    private double size = 8.0;
+    private double size = 10.0;
 
     public Bird (double x, double y) {
         super(x, y);
@@ -31,7 +31,7 @@ public class Bird extends MovingEntity {
         // Acceleration changes velocity
         this.dx += this.ax;
         this.dy += this.ay;
-        limitVelocity(3.0);
+        limitVelocity(4.0);
         // Velocity changes position
         this.x += this.dx;
         this.y += this.dy;
@@ -41,8 +41,8 @@ public class Bird extends MovingEntity {
         this.ay = 0;
     }
    private void avoidWalls(double width, double height) {
-        double margin = 50.0; 
-        double turnFactor = 0.5;
+        double margin = 100.0; 
+        double turnFactor = 0.2;
         
         if (this.x < margin) {
             this.ax += turnFactor;

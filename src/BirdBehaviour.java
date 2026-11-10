@@ -33,7 +33,7 @@ public final class BirdBehaviour {
 
         @Override
         public void calculate(Bird self, World world) {
-            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 25.0);
+            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 15.0);
             double[] force = neighbors.stream().collect(repulsionFrom(self));
             self.applyForce(force[0] * weight, force[1] * weight);
         }
@@ -52,7 +52,7 @@ public final class BirdBehaviour {
 
         @Override
         public void calculate(Bird self, World world) {
-            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50.0);
+            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 60.0);
             if (neighbors.isEmpty()) return;
  
             double[] avg = neighbors.stream().collect(Collectors.teeing(
@@ -77,7 +77,7 @@ public final class BirdBehaviour {
 
         @Override
         public void calculate(Bird self, World world) {
-            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50);
+            List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 75);
             if (neighbors.isEmpty()) return;
 
             double[] center = neighbors.stream().collect(Collectors.teeing(

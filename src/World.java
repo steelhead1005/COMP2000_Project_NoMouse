@@ -32,11 +32,38 @@ public class World {
         }
         birds.add(bird);
     }
-    public void addObstacle(Obstacle obstacle) {
+    public synchronized void addObstacle(Obstacle obstacle) {
         if (obstacle == null) {
             throw new IllegalArgumentException("Cannot add a null Obstacle to the world.");
         }
         obstacles.add(obstacle);
+    }
+
+    public enum ObstacleShape {
+        CIRCLE("Circle"), RECTANGLE("Rectangle");
+
+        private final String label;
+
+        ObstacleShape(String label) { this.label = label; }
+
+        @Override
+        public String toString() { return label; }
+    }
+
+    public synchronized void spawnObstacle(ObstacleShape shape, double speed) throws Obstacle.SpawnException {
+        Obstacle obstacle = switch (shape) {
+            case CIRCLE -> Obstacle.spawnRandom((int) width, (int) height, Long.MAX_VALUE, obstacles);
+            case RECTANGLE -> PillarObstacle.spawnRandom(width, height, obstacles);
+        };
+        if (speed > 0) {
+            double angle = Math.random() * 2 * Math.PI;
+            obstacle.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
+        }
+        obstacles.add(obstacle);
+    }
+
+    public synchronized void clearObstacles() {
+        obstacles.clear();
     }
 
     public void addBehaviour(Behaviour<Bird> behaviour) {
@@ -64,6 +91,8 @@ public class World {
         
     }
     public synchronized void update() {
+        obstacles.removeIf(Obstacle::isExpired);
+        obstacles.forEach(obstacle -> obstacle.move(width, height));
         for (Predator predator : predators) {
             predator.update(birds, obstacles);
             resolvePillarCollisions(predator, predator.getBodyRadius());
