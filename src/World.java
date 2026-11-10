@@ -67,6 +67,7 @@ public class World {
         for (Predator predator : predators) {
             predator.update(birds, obstacles);
             resolvePillarCollisions(predator, predator.getBodyRadius());
+            keepInBounds(predator);
         }
         birds.parallelStream().forEach(bird -> {
             obstacles.stream()
@@ -77,6 +78,7 @@ public class World {
         birds.parallelStream().forEach(bird -> {
             bird.integrate(this);
             resolvePillarCollisions(bird, 4);
+            keepInBounds(bird);
         });
     }
     /** Copy one consistent frame while update() is excluded by this same monitor.
@@ -90,6 +92,14 @@ public class World {
         predators.forEach(predator -> predatorPositions.add(
                 new PredatorAnalytics.Position(predator.getX(), predator.getY())));
         return new PredatorAnalytics.Snapshot(birdPositions, predatorPositions);
+    }
+
+    private void keepInBounds(MovingEntity entity) {
+        double x = Math.max(0, Math.min(width, entity.getX()));
+        double y = Math.max(0, Math.min(height, entity.getY()));
+        if (x != entity.getX()) entity.dx = 0;
+        if (y != entity.getY()) entity.dy = 0;
+        entity.setPosition(x, y);
     }
 
     private void resolvePillarCollisions(MovingEntity entity, double padding) {
