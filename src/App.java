@@ -16,9 +16,14 @@ public class App {
     private final JSlider alignment = new JSlider();
     private final JSlider cohesion = new JSlider();
 
+    private final BirdBehaviour.Separation separationRule = new BirdBehaviour.Separation(1.5);
+    private final BirdBehaviour.Alignment alignmentRule = new BirdBehaviour.Alignment(0.05);
+    private final BirdBehaviour.Cohesion cohesionRule = new BirdBehaviour.Cohesion(0.01);
+    private final Behaviour<Bird> fleeRule = BirdBehaviour.fleePredators(80, 0.02);
+
 
     //creates a slider with the corect labels
-    private Panel labelledSlider(String name, JSlider slider, int min, int max, int start) {
+    private Panel labelledSlider(String name, JSlider slider, int min, int max, int start, Behaviour<Bird> rule) {
     slider.setMinimum(min);
     slider.setMaximum(max);
     slider.setValue(start);
@@ -33,9 +38,19 @@ public class App {
     Panel row = new Panel(new BorderLayout());
     row.add(label, BorderLayout.WEST);
     row.add(slider, BorderLayout.CENTER);
+    row.add(toggle(rule), BorderLayout.EAST);
     return row;
 }
 
+
+    private JCheckBox toggle(Behaviour<Bird> rule) {
+        JCheckBox box = new JCheckBox("On", true);
+        box.addItemListener(e -> {
+            if (box.isSelected()) world.addBehaviour(rule);
+            else world.removeBehaviour(rule);
+        });
+        return box;
+    }
 
     private final ScheduledExecutorService simLoop = Executors.newSingleThreadScheduledExecutor(task -> {
         Thread thread = new Thread(task, "sim-loop");
@@ -62,6 +77,10 @@ public class App {
             } catch (IllegalArgumentException e) {
                 System.err.println("Failed to add predator: " + e.getMessage());
             }
+            world.addBehaviour(separationRule);
+            world.addBehaviour(alignmentRule);
+            world.addBehaviour(cohesionRule);
+            world.addBehaviour(fleeRule);
             world.addObstacle(leftPillar);
             world.addObstacle(bottomPillar);
             // Setting flockPanel paramaters
@@ -100,14 +119,21 @@ public class App {
 
             //Add Slider to sliderPanel
 
-            sliderPanel.setLayout(new GridLayout(3, 1, 5, 5));   // one row per slider
-            sliderPanel.add(labelledSlider("Separation", separation, 0, 20, 15));
-            sliderPanel.add(labelledSlider("Alignment", alignment, 0, 10, 5));
-            sliderPanel.add(labelledSlider("Cohesion", cohesion, 0, 10, 1));
-            
-            separation.addChangeListener(e -> BirdBehaviour.separationWeight = separation.getValue() / 10.0);
-            alignment.addChangeListener(e  -> BirdBehaviour.alignmentWeight  = alignment.getValue() / 100.0);
-            cohesion.addChangeListener(e  -> BirdBehaviour.cohesionWeight  = cohesion.getValue() / 100.0);
+            sliderPanel.setLayout(new GridLayout(4, 1, 5, 5));   // one row per behaviour
+            sliderPanel.add(labelledSlider("Separation", separation, 0, 20, 15, separationRule));
+            sliderPanel.add(labelledSlider("Alignment", alignment, 0, 10, 5, alignmentRule));
+            sliderPanel.add(labelledSlider("Cohesion", cohesion, 0, 10, 1, cohesionRule));
+
+            Panel fleeRow = new Panel(new BorderLayout());
+            JLabel fleeLabel = new JLabel("     Flee predators");
+            fleeLabel.setPreferredSize(new Dimension(110, 20));
+            fleeRow.add(fleeLabel, BorderLayout.WEST);
+            fleeRow.add(toggle(fleeRule), BorderLayout.EAST);
+            sliderPanel.add(fleeRow);
+
+            separation.addChangeListener(e -> separationRule.setWeight(separation.getValue() / 10.0));
+            alignment.addChangeListener(e  -> alignmentRule.setWeight(alignment.getValue() / 100.0));
+            cohesion.addChangeListener(e  -> cohesionRule.setWeight(cohesion.getValue() / 100.0));
 
             frame.addComponentListener(new ComponentAdapter() {
                 @Override 

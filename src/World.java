@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 public class World {
     public double width;
     public double height;
@@ -7,6 +8,7 @@ public class World {
     private final List<Bird> birds = new ArrayList<>();
     private final List<Obstacle> obstacles = new ArrayList<>();
     private final List<Predator> predators = new ArrayList<>();
+    private final List<Behaviour<Bird>> behaviours = new CopyOnWriteArrayList<>();
 
 
 
@@ -35,6 +37,23 @@ public class World {
             throw new IllegalArgumentException("Cannot add a null Obstacle to the world.");
         }
         obstacles.add(obstacle);
+    }
+
+    public void addBehaviour(Behaviour<Bird> behaviour) {
+        if (behaviour == null) {
+            throw new IllegalArgumentException("Cannot add a null Behaviour to the world.");
+        }
+        if (!behaviours.contains(behaviour)) {
+            behaviours.add(behaviour);
+        }
+    }
+
+    public void removeBehaviour(Behaviour<Bird> behaviour) {
+        behaviours.remove(behaviour);
+    }
+
+    public List<Behaviour<Bird>> getBehaviours() {
+        return behaviours;
     }
 
     public synchronized void addPredator(Predator predator){
@@ -87,13 +106,9 @@ public class World {
         if (radius < 0) {
             throw new IllegalArgumentException("Search radius cannot be negative.");
         }
-        List<T> inRange = new ArrayList<>();
-        for (T entity : entities) {
-            if (entity != center && center.distanceTo(entity) < radius) {
-                inRange.add(entity);
-            }
-        }
-        return inRange;
+        return entities.stream()
+                .filter(entity -> entity != center && center.distanceTo(entity) < radius)
+                .toList();
     }
 
     public List<Bird> getBirds() {
@@ -115,7 +130,7 @@ public class World {
     public int getPredatorCount(List<Predator> list){
         return list.size();
     }    
-    public void changeBounds(double width, double height){
+    public synchronized void changeBounds(double width, double height){
         this.width = width;
         this.height = height;
     }

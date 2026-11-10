@@ -3,10 +3,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public final class BirdBehaviour {
-    
-    public static double separationWeight = 1.5;
-    public static double alignmentWeight = 0.05;
-    public static double cohesionWeight = 0.01;
+
+    private BirdBehaviour() { }
 
     private static Collector<Bird, double[], double[]> repulsionFrom(Bird self) {
     return Collector.of(
@@ -23,15 +21,35 @@ public final class BirdBehaviour {
     }
 
     public static class Separation implements Behaviour<Bird> {
+        private volatile double weight;
+
+        public Separation(double weight) {
+            this.weight = weight;
+        }
+
+        public void setWeight(double weight) {
+            this.weight = weight;
+        }
+
         @Override
-        public /*Maybe make vector class*/ void  calculate(Bird self, World world) {
+        public void calculate(Bird self, World world) {
             List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 25.0);
             double[] force = neighbors.stream().collect(repulsionFrom(self));
-            self.applyForce(force[0] * separationWeight, force[1] * separationWeight);
+            self.applyForce(force[0] * weight, force[1] * weight);
         }
     }
 
     public static class Alignment implements Behaviour<Bird> {
+        private volatile double weight;
+
+        public Alignment(double weight) {
+            this.weight = weight;
+        }
+
+        public void setWeight(double weight) {
+            this.weight = weight;
+        }
+
         @Override
         public void calculate(Bird self, World world) {
             List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50.0);
@@ -42,11 +60,21 @@ public final class BirdBehaviour {
                 Collectors.averagingDouble(Bird::getVelocityY),
                 (avgDx, avgDy) -> new double[]{avgDx, avgDy}));
 
-            self.applyForce((avg[0] - self.getVelocityX()) * alignmentWeight, (avg[1] - self.getVelocityY()) * alignmentWeight);
+            self.applyForce((avg[0] - self.getVelocityX()) * weight, (avg[1] - self.getVelocityY()) * weight);
         }
     }
 
     public static class Cohesion implements Behaviour<Bird> {
+        private volatile double weight;
+
+        public Cohesion(double weight) {
+            this.weight = weight;
+        }
+
+        public void setWeight(double weight) {
+            this.weight = weight;
+        }
+
         @Override
         public void calculate(Bird self, World world) {
             List<Bird> neighbors = world.getEntitiesInRange(world.getBirds(), self, 50);
@@ -57,8 +85,14 @@ public final class BirdBehaviour {
                 Collectors.averagingDouble(Bird::getY),
                 (centerX, centerY) -> new double[]{centerX, centerY}));
 
-            self.applyForce((center[0] - self.getX()) * cohesionWeight, (center[1] - self.getY()) * cohesionWeight);
+            self.applyForce((center[0] - self.getX()) * weight, (center[1] - self.getY()) * weight);
         }
-    } 
-}
+    }
 
+    public static Behaviour<Bird> fleePredators(double range, double weight) {
+        return (self, world) -> world.getPredators().stream()
+                .filter(predator -> self.distanceTo(predator) < range)
+                .forEach(predator -> self.applyForce((self.getX() - predator.getX()) * weight,
+                        (self.getY() - predator.getY()) * weight));
+    }
+}

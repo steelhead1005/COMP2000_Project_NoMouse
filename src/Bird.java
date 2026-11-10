@@ -1,15 +1,9 @@
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.util.List;
 
 public class Bird extends MovingEntity {
     private double mass = 1.0;
     private double size = 8.0;
-
-   private static final List<Behaviour<Bird>> Behaviours = List.of(
-            new BirdBehaviour.Separation(),
-            new BirdBehaviour.Alignment(),
-            new BirdBehaviour.Cohesion());
 
     public Bird (double x, double y) {
         super(x, y);
@@ -25,10 +19,8 @@ public class Bird extends MovingEntity {
         this.ay += forceY / this.mass;
     }
 
-    //@Override
-    //needs bird list param
     public void computeForces(World world) {
-        Behaviours.forEach(behaviour -> behaviour.calculate(this, world));
+        world.getBehaviours().forEach(behaviour -> behaviour.calculate(this, world));
     }
 
     public void integrate(World world) {
