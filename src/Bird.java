@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 public class Bird extends MovingEntity {
     private double mass = 1.0;
     private double size = 10.0;
+    private static final double MIN_SPEED = 3.0;
 
     public Bird (double x, double y) {
         super(x, y);
@@ -32,6 +33,7 @@ public class Bird extends MovingEntity {
         this.dx += this.ax;
         this.dy += this.ay;
         limitVelocity(4.0);
+        enforceMinimumSpeed(MIN_SPEED);
         // Velocity changes position
         this.x += this.dx;
         this.y += this.dy;
@@ -40,6 +42,18 @@ public class Bird extends MovingEntity {
         this.ax = 0;
         this.ay = 0;
     }
+    private void enforceMinimumSpeed(double minimumSpeed) {
+        double speed = Math.hypot(this.dx, this.dy);
+        if (speed == 0) {
+            double angle = Math.random() * 2 * Math.PI;
+            this.dx = Math.cos(angle) * minimumSpeed;
+            this.dy = Math.sin(angle) * minimumSpeed;
+        } else if (speed < minimumSpeed) {
+            this.dx = this.dx / speed * minimumSpeed;
+            this.dy = this.dy / speed * minimumSpeed;
+        }
+    }
+
    private void avoidWalls(double width, double height) {
         double margin = 100.0; 
         double turnFactor = 0.2;

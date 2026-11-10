@@ -55,6 +55,7 @@ public class World {
             case CIRCLE -> Obstacle.spawnRandom((int) width, (int) height, Long.MAX_VALUE, obstacles);
             case RECTANGLE -> PillarObstacle.spawnRandom(width, height, obstacles);
         };
+        obstacle.setColor(Obstacle.randomColor());
         if (speed > 0) {
             double angle = Math.random() * 2 * Math.PI;
             obstacle.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);

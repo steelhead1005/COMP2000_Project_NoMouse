@@ -83,6 +83,9 @@ public class App {
             world.addBehaviour(alignmentRule);
             world.addBehaviour(cohesionRule);
             world.addBehaviour(fleeRule);
+            Obstacle centreObstacle = new Obstacle(world.width / 2, world.height / 2, 90, Long.MAX_VALUE);
+            centreObstacle.setColor(Obstacle.randomColor());
+            world.addObstacle(centreObstacle);
             // Setting flockPanel paramaters
             flockPanel.setBackground(bgColor);
             // Setting sliderPanel paramaters

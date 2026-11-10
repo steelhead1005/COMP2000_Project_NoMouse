@@ -136,15 +136,15 @@ public class PillarObstacle extends Obstacle {
             int h = (int) Math.round(height);
 
             //obstacle 1
-            g.setColor(new Color(120, 70, 30)); //RGB: 78461e (middle)
+            g.setColor(getColor());
             g.fillRect(left, top, w, h);
 
             //obstacle 2
-            g.setColor(new Color(190, 140, 85));  //RGB: be8c55 (lightest)
+            g.setColor(getColor().brighter());
             g.drawLine(left + 2, top + 2, left + w - 2, top + 2);
 
             //obstacle 3
-            g.setColor(new Color(65, 40, 20));  //RGB: 412814 (darkest)
+            g.setColor(getColor().darker());
             g.drawRect(left, top, w, h);
 
         } finally {

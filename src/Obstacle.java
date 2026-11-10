@@ -11,6 +11,7 @@ public class Obstacle extends Entity {
     private long spawnTimeMillis;
     private long lifespanMillis;
     private double vx, vy;
+    private Color color = new Color(120, 70, 30);
 
     public Obstacle(double x, double y, double radius, long lifespanMillis) { // Constructor for obstacle
         super(x, y); 
@@ -65,6 +66,19 @@ public class Obstacle extends Entity {
         }
         this.vx = vx;
         this.vy = vy;
+    }
+
+    public Color getColor() { return color; }
+
+    public void setColor(Color color) {
+        if (color == null) {
+            throw new IllegalArgumentException("Colour cannot be null.");
+        }
+        this.color = color;
+    }
+
+    public static Color randomColor() {
+        return Color.getHSBColor(RNG.nextFloat(), 0.55f + RNG.nextFloat() * 0.3f, 0.75f + RNG.nextFloat() * 0.2f);
     }
 
     public boolean isMoving() {
@@ -158,9 +172,9 @@ public class Obstacle extends Entity {
         int drawY = (int) (y - radius);
         int diameter = (int) (radius * 2);
 
-        g2d.setColor(new Color(120, 70, 30));
+        g2d.setColor(color);
         g2d.fillOval(drawX, drawY, diameter, diameter);
-        g2d.setColor(Color.BLACK);
+        g2d.setColor(color.darker());
         g2d.drawOval(drawX, drawY, diameter, diameter);
     }
 
