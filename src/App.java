@@ -9,8 +9,8 @@ public class App {
     private final PillarObstacle leftPillar = new PillarObstacle(0, 220, 128, 40);
     private final PillarObstacle bottomPillar = new PillarObstacle(200, 260, 32, 140);
 
-    private final Frame frame = new Frame("Flock Simulation");
-    private final Panel sliderPanel = new Panel();
+    private final JFrame frame = new JFrame("Flock Simulation");
+    private final JPanel sliderPanel = new JPanel();
 
     private final JSlider separation = new JSlider();
     private final JSlider alignment = new JSlider();
@@ -19,11 +19,11 @@ public class App {
     private final BirdBehaviour.Separation separationRule = new BirdBehaviour.Separation(1.5);
     private final BirdBehaviour.Alignment alignmentRule = new BirdBehaviour.Alignment(0.05);
     private final BirdBehaviour.Cohesion cohesionRule = new BirdBehaviour.Cohesion(0.01);
-    private final Behaviour<Bird> fleeRule = BirdBehaviour.fleePredators(80, 0.02);
+    private final Behaviour<Bird> fleeRule = BirdBehaviour.fleePredators(80, 1.5);
 
 
     //creates a slider with the corect labels
-    private Panel labelledSlider(String name, JSlider slider, int min, int max, int start, Behaviour<Bird> rule) {
+    private JPanel labelledSlider(String name, JSlider slider, int min, int max, int start, Behaviour<Bird> rule) {
     slider.setMinimum(min);
     slider.setMaximum(max);
     slider.setValue(start);
@@ -33,9 +33,12 @@ public class App {
     label.setPreferredSize(new Dimension(110, 20));   
 
     // Update the text whenever the slider moves
-    slider.addChangeListener(e -> label.setText(name + ": " + slider.getValue()));
+    slider.addChangeListener(e -> label.setText("     " + name + ": " + slider.getValue()));
 
-    Panel row = new Panel(new BorderLayout());
+    slider.setOpaque(false);
+
+    JPanel row = new JPanel(new BorderLayout());
+    row.setOpaque(false);
     row.add(label, BorderLayout.WEST);
     row.add(slider, BorderLayout.CENTER);
     row.add(toggle(rule), BorderLayout.EAST);
@@ -45,6 +48,7 @@ public class App {
 
     private JCheckBox toggle(Behaviour<Bird> rule) {
         JCheckBox box = new JCheckBox("On", true);
+        box.setOpaque(false);
         box.addItemListener(e -> {
             if (box.isSelected()) world.addBehaviour(rule);
             else world.removeBehaviour(rule);
@@ -84,11 +88,10 @@ public class App {
             world.addObstacle(leftPillar);
             world.addObstacle(bottomPillar);
             // Setting flockPanel paramaters
-            flockPanel.setBounds(0, 0, 600, 400);
             flockPanel.setBackground(bgColor);
             // Setting sliderPanel paramaters
-            sliderPanel.setBounds(0, 400, 600, 200);
             sliderPanel.setBackground(Color.gray);
+            sliderPanel.setPreferredSize(new Dimension(600, 160));
 
             for (int i = 0; i < 600; i++) {
                 try {
@@ -106,16 +109,9 @@ public class App {
             
             
             // Add panels to Frame and set Frame layout
-            frame.add(flockPanel);
-            frame.add(sliderPanel);
-            
-
-            // Set frame layout.
-            frame.setLayout(null);
-
-            //Set frame size and make it visible.
-            frame.setVisible(true);
-            frame.setSize((int)world.width, (int)world.height);
+            frame.setLayout(new BorderLayout());
+            frame.add(flockPanel, BorderLayout.CENTER);
+            frame.add(sliderPanel, BorderLayout.SOUTH);
 
             //Add Slider to sliderPanel
 
@@ -124,7 +120,8 @@ public class App {
             sliderPanel.add(labelledSlider("Alignment", alignment, 0, 10, 5, alignmentRule));
             sliderPanel.add(labelledSlider("Cohesion", cohesion, 0, 10, 1, cohesionRule));
 
-            Panel fleeRow = new Panel(new BorderLayout());
+            JPanel fleeRow = new JPanel(new BorderLayout());
+            fleeRow.setOpaque(false);
             JLabel fleeLabel = new JLabel("     Flee predators");
             fleeLabel.setPreferredSize(new Dimension(110, 20));
             fleeRow.add(fleeLabel, BorderLayout.WEST);
@@ -135,13 +132,10 @@ public class App {
             alignment.addChangeListener(e  -> alignmentRule.setWeight(alignment.getValue() / 100.0));
             cohesion.addChangeListener(e  -> cohesionRule.setWeight(cohesion.getValue() / 100.0));
 
-            frame.addComponentListener(new ComponentAdapter() {
+            flockPanel.addComponentListener(new ComponentAdapter() {
                 @Override 
                 public void componentResized(ComponentEvent e) {
-                    Dimension d = e.getComponent().getSize();
-                    world.changeBounds(d.width, d.height * 2/3);
-                    flockPanel.setBounds(0, 0, d.width, d.height * 2/3);
-                    sliderPanel.setBounds(0, d.height * 2/3, d.width, d.height / 3);
+                    world.changeBounds(Math.max(1, flockPanel.getWidth()), Math.max(1, flockPanel.getHeight()));
                     double viewWidth = Math.max(1, flockPanel.getWidth());
                     double viewHeight = Math.max(1, flockPanel.getHeight());
                     synchronized (world) {
@@ -151,6 +145,10 @@ public class App {
                     }
                 }
             });
+
+            //Set frame size and make it visible.
+            frame.setSize((int)world.width, (int)world.height);
+            frame.setVisible(true);
 
             // If window closes, exit the program.
             frame.addWindowListener(
@@ -192,6 +190,6 @@ public class App {
     }
     //for testing purposess will be moved later
     public static void main(String[] args) {
-        new App();
+        SwingUtilities.invokeLater(App::new);
     }
 }

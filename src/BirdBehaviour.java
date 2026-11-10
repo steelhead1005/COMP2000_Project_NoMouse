@@ -92,7 +92,11 @@ public final class BirdBehaviour {
     public static Behaviour<Bird> fleePredators(double range, double weight) {
         return (self, world) -> world.getPredators().stream()
                 .filter(predator -> self.distanceTo(predator) < range)
-                .forEach(predator -> self.applyForce((self.getX() - predator.getX()) * weight,
-                        (self.getY() - predator.getY()) * weight));
+                .forEach(predator -> {
+                    double d = Math.max(0.001, self.distanceTo(predator));
+                    double strength = (range - d) / range * weight;
+                    self.applyForce((self.getX() - predator.getX()) / d * strength,
+                            (self.getY() - predator.getY()) / d * strength);
+                });
     }
 }
